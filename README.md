@@ -18,13 +18,13 @@ library(fUnitRoots)
 
 
 ###Lectura de datos, importacion del archivo con todas las generadoras, se decide aplicar filtro con Guavio, San Carlos y Chivor con base en su capacidad efectiva, son las de mayor capacidad
-Datos<-read.csv("C:/Users/lorena_hoyos/Documents/Posgrado Unal/Analitica predictiva/Precio_Oferta.csv",sep =";", header = TRUE,   skip = 0)
+Datos<-read.csv("C:/Users/Usuario/Desktop/Especialización/Analítica predictiva/Trabajo/Entregable/Precio_Oferta.csv",sep =";", header = TRUE,   skip = 0)
 
 View(Datos)
 
 
 ###Extracción de la columna Precio de Oferta declarado
-Generador <- Datos$GUAVIO
+Generador <- Datos$SAN.CARLOS
 mode(Generador)
 
 
@@ -32,7 +32,7 @@ mode(Generador)
 Generador.ts <- ts(Generador, start = c(2018,1),frequency = 365)
 print(Generador.ts)
 
-plot.ts(Generador.ts,main = "Serie de tiempo Guavio", col = "red")
+plot.ts(Generador.ts,main = "Serie de tiempo Chivor", col = "red")
 
 
 ####Estadistica descriptiva
@@ -153,8 +153,8 @@ fit_2
 
 # The models can also be estimated by using the Arima() function in the "forecast" package
 #Guavio
-fit_1 <- Arima(log(Guavio), order = c(2,1,3), include.constant = TRUE) # ARIMA(2,1,3) (p,d,q) autorregresiva, integrada (diferencias diff) y media móvil
-fit_2 <- Arima(log(Guavio), order = c(1,1,2), include.constant = TRUE) # ARIMA(1,1,2) (p,d,q) autorregresiva, integrada (diferencias diff) y media móvil
+fit_1 <- Arima(log(Generador), order = c(2,1,3), include.constant = TRUE) # ARIMA(2,1,3) (p,d,q) autorregresiva, integrada (diferencias diff) y media móvil
+fit_2 <- Arima(log(Generador), order = c(1,1,2), include.constant = TRUE) # ARIMA(1,1,2) (p,d,q) autorregresiva, integrada (diferencias diff) y media móvil
 summary(fit_1)
 summary(fit_2)
 
@@ -273,17 +273,15 @@ abline(v=n, lty=2)
 
 ts.plot(cbind(exp(Generador_forecasts$lower[,2]), exp(Generador_forecasts$mean), exp(Generador_forecasts$upper[,2])), lty=c(2,1,2), col=c(2,1,2))
 
+#Export con la Predicción de los precios
+Pronostico = round(exp(Generador_forecasts$mean),digits = 2)
+write.table(Pronostico, file="C:/Users/Usuario/Desktop/Especialización/Analítica predictiva/Trabajo/Entregable/Pronostico_Precios_SanCarlos.csv", sep = ";")
+mode(Pronostico)
+
 acf(Generador_forecasts$residuals, lag.max=20)
 Box.test(Generador_forecasts$residuals, lag=20, type = "Box-Pierce", fitdf = 0)
 Box.test(Generador_forecasts$residuals, lag=20, type = "Ljung-Box", fitdf = 0)
 plot.ts(Generador_forecasts$residuals)            # make time plot of forecast errors
-
-
-#Export con la Predicción de los precios
-Data_Predict = round(exp(Generador_forecasts$mean), digits=2)
-write.table(Data_Predict, file="C:/Users/lorena_hoyos/Documents/Posgrado Unal/Analitica predictiva/Prediccion_Precios_Generador.csv", sep = ";")
-
-
 
 
 
@@ -292,16 +290,18 @@ install.packages("caret")
 library(caret)
 
 
-Generador.training.ids <- createDataPartition(Datos$GUAVIO, p=0.8, list = F)
+Generador.training.ids <- createDataPartition(Datos$SAN.CARLOS, p=0.8, list = F)
 
 Datos.training <- Datos[Generador.training.ids,]
 View(Datos.training)
 Datos.validation <- Datos[-Generador.training.ids,]
 
 
-Generador_Training <- Datos.training$GUAVIO ###Modificar según el generador a elegir
+Generador_Training <- Datos.training$SAN.CARLOS ###Modificar según el generador a elegir
 
 
 
 #Prediccion
-predict(Datos.training$GUAVIO)  ###Modificar según el generador a elegir
+Prediccion_PreciosSanCarlos_Part <- predict(Datos.training$SAN.CARLOS)  ###Modificar según el generador a elegir
+Prediccion_PreciosSanCarlos_Part = round((Prediccion_PreciosChivor_Part),digits = 2)
+write.table(Prediccion_PreciosChivor_Part, file="C:/Users/Usuario/Desktop/Especialización/Analítica predictiva/Trabajo/Entregable/Pronostico_Part_Precios_Chivor.csv", sep = ";")
